@@ -6,5 +6,7 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/comm.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/jna.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/platform.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>
