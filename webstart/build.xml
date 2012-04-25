@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="webstart" basedir=".">
+	<property file="build.properties" />
+	<property name="src" value="src" />
+	<property name="web" value="web" />
+	<property name="dist" value="dist" />
+	<property name="build.classes" value="${web}/WEB-INF/classes" />
+	<property name="webapp.name" value="applet" />
+	<property name="webapp.version" value="1.0" />
+	<property name="applet_jar.deploy" value="${web}/jar/applet" />
+	<path id="lib.classpath">
+		<fileset dir="${web}/WEB-INF/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<property name="dname" value="CN=${dname.CN},OU=${dname.OU},O=${dname.O},L=${dname.L},ST=${dname.ST},C=${dname.C}" />
+
+	<target name="init">
+		<mkdir dir="${dist}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build.classes}" debug="true" deprecation="false" optimize="false" source="1.4" target="1.4" encoding="utf8" classpathref="lib.classpath">
+		</javac>
+		<copy todir="${build.classes}">
+			<fileset dir="${src}">
+				<include name="**/*.properties" />
+				<include name="**/*.xml" />
+				<include name="**/*.fr3" />
+				<exclude name="*_zh_CN.properties" />
+			</fileset>
+		</copy>
+		<native2ascii src="${src}" dest="${build.classes}" encoding="UTF-8">
+			<include name="*_zh_CN.properties" />
+		</native2ascii>
+	</target>
+
+	<target name="package-jar" depends="compile" description="Package JAR">
+		<jar destfile="${dist}/${webapp.name}.jar">
+			<manifest>
+				<attribute name="Class-Path" value="${webapp.name}.jar" />
+				<attribute name="Implementation-Title" value="${webapp.name}" />
+				<attribute name="Implementation-Version" value="${webapp.version}" />
+			</manifest>
+			<fileset dir="${build.classes}">
+				<exclude name="*.properties" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<echo level="info">Cleaning build and distribution directories</echo>
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="keytool" depends="undeploy" description="gen key">
+		<echo message="keytool gen key..." />
+		<echo message="${keytool.home}\${keytool}" />
+
+		<exec dir="${dist}" executable="${keytool.home}/${keytool}">
+			<arg line="-genkey" />
+			<arg line="-dname ${dname}" />
+			<arg line="-keystore ${keystore}" />
+			<arg line="-alias ${alias}" />
+			<arg line="-storepass ${storepass}" />
+			<arg line="-keypass ${keypass}" />
+		</exec>
+
+		<echo message="keytool export cer..." />
+		<exec dir="${dist}" executable="${keytool.home}/${keytool}">
+			<arg line="-export" />
+			<arg line="-keystore ${keystore}" />
+			<arg line="-storepass ${storepass}" />
+			<arg line="-alias ${alias}" />
+			<arg line="-file ${cer.file}" />
+		</exec>
+		<echo message="keytool...done." />
+	</target>
+
+	<target name="jarsigner" depends="package-jar,keytool">
+		<!-- Sign the jar -->
+		<echo message="jarsigner..." />
+		<exec dir="${dist}" executable="${jarsigner.home}/${jarsigner}">
+			<arg line="-keystore ${keystore}" />
+			<arg line="-storepass ${storepass}" />
+			<arg line="${webapp.name}.jar" />
+			<arg line="${alias}" />
+		</exec>
+		<echo message="jarsigner...done." />
+		<!--delete file="${keystore}" /-->
+		<!--delete file="${cer.file}" /-->
+		<!--delete dir="${dist}" /-->
+	</target>
+
+	<target name="deploy" depends="jarsigner">
+		<delete file="${applet_jar.deploy}/${webapp.name}.jar" />
+		<copy todir="${applet_jar.deploy}">
+			<fileset dir="${dist}">
+			    <include name="*.jar"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="undeploy">
+		<delete file="${dist}/${keystore}" />
+		<delete file="${dist}/${cer.file}" />
+	</target>
+</project>

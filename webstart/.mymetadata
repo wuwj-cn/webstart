@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="webstart"
+  id="myeclipse.1333470490147"
+  context-root="/webstart"
+  j2ee-spec="5.0"
+  archive="webstart.war">
+  <attributes>
+    <attribute name="webrootdir" value="web" />
+  </attributes>
+</project-module>
+
